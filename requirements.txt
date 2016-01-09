@@ -1,9 +1,24 @@
+-e git+git@github.com:hichtakk/asset.git@64e8280e643be744d70fe8f4a9c5367c73a32f2f#egg=assetdb-master
+Chameleon==2.24
+Jinja2==2.8
+Mako==1.0.3
+MarkupSafe==0.23
 PasteDeploy==1.5.2
+Pygments==2.0.2
+PyMySQL==0.6.7
 pyramid==1.6
+pyramid-chameleon==0.3
+pyramid-debugtoolbar==2.4.2
+pyramid-jinja2==2.5
+pyramid-mako==1.0.2
+pyramid-tm==0.12.1
 repoze.lru==0.6
 SQLAlchemy==1.0.11
+transaction==1.4.4
 translationstring==1.3
 venusian==1.0
+waitress==0.8.10
 WebOb==1.5.1
 zope.deprecation==4.1.2
 zope.interface==4.1.3
+zope.sqlalchemy==0.7.6
