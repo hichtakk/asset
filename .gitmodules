@@ -1,0 +1,3 @@
+[submodule "assetdb/assetdb/static/bootstrap"]
+	path = assetdb/assetdb/static/bootstrap
+	url = git@github.com:twbs/bootstrap.git
