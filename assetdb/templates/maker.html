@@ -1,0 +1,56 @@
+{% include "header.html" %}
+
+<h1 class="page-header">Maker List</h1>
+
+<div class="table-responsive">
+<table class="table table-striped">
+<thead>
+<tr>
+<th>name</th>
+<th>description</th>
+<th>registed models</th>
+<th>registed assets</th>
+</tr>
+</thead>
+<tbody id="makers">
+</tbody>
+</table>
+</div>
+
+<script type="text/javascript">
+$(function(){
+  $.ajax({
+    type: 'GET',
+    dataType: 'json',
+    cache: false,
+    url: '/api/maker',
+    success: function(data)
+    {
+      var makers = [];
+      for (var index in data.maker) {
+        makers.push(
+          {
+            "id": data.maker[index].id,
+            "name": data.maker[index].name,
+            "description": data.maker[index].description ? data.maker[index].description : '-',
+            "models": data.maker[index].models,
+            "items": data.maker[index].items
+          }
+        );
+      }
+      for (var maker in makers) {
+        $("#makers").append(
+          "<tr><td>" + 
+          "<a href=\"/maker/" + makers[maker].id + "\">" + makers[maker].name + "</a></td><td>" + 
+          makers[maker].description + "</td><td>" +
+          makers[maker].models + "</td><td>" +
+          makers[maker].items + "</td></tr>"
+        );
+      }
+    }
+  });
+});
+</script>
+
+{% include "footer.html" %}
+

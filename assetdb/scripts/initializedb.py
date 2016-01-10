@@ -2,7 +2,9 @@ import os
 import sys
 import transaction
 
-from sqlalchemy import engine_from_config
+from sqlalchemy import (
+    engine_from_config,
+    )
 
 from pyramid.paster import (
     get_appsettings,
@@ -13,7 +15,11 @@ from pyramid.scripts.common import parse_vars
 
 from ..models import (
     DBSession,
-    MyModel,
+    Maker,
+    Vendor,
+    Model,
+    Location,
+    Item,
     Base,
     )
 
@@ -36,5 +42,25 @@ def main(argv=sys.argv):
     DBSession.configure(bind=engine)
     Base.metadata.create_all(engine)
     with transaction.manager:
-        model = MyModel(name='one', value=1)
-        DBSession.add(model)
+        maker = Maker(name='Juniper Networks')
+        vendor = Vendor(name='NTT Facilities USA', description='NTT Communications')
+        model = Model(name='MX960', maker_id=maker.id)
+        model_mpc = Model(name='MPC3D-10G', maker_id=maker.id)
+        model_sfp = Model(name='SFPP-LR', maker_id=maker.id)
+        maker.models.append(model)
+        maker.models.append(model_mpc)
+        maker.models.append(model_sfp)
+        location = Location(name='MDFAXX', description='CC1 3F MDFAXX')
+        item = Item(name='luke.net.cc1', serial='XXXXKKKKYYYYY', status='in use', support='send back')
+        model.items.append(item)
+        vendor.items.append(item)
+        location.items.append(item)
+        mpc = Item(serial='XXXXKKKKzzzzz', status='in use', support='send back')
+        model_mpc.items.append(mpc)
+        vendor.items.append(mpc)
+        location.items.append(mpc)
+        item.attachments.append(mpc)
+        DBSession.add(maker)
+        DBSession.add(vendor)
+        DBSession.add(location)
+

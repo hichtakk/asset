@@ -1,21 +1,103 @@
 from pyramid.response import Response
-from pyramid.view import view_config
+from pyramid.httpexceptions import (
+    HTTPFound,
+    HTTPNotFound
+    )
+from pyramid.view import (
+    view_config,
+    forbidden_view_config
+    )
+from pyramid.security import (
+    remember,
+    forget
+    )
 
 from sqlalchemy.exc import DBAPIError
 
 from .models import (
     DBSession,
-    MyModel,
+    Maker,
+    Vendor,
+    Location,
+    Item
     )
+from .security import USERS
 
 
-@view_config(route_name='home', renderer='templates/mytemplate.pt')
-def my_view(request):
+@view_config(route_name='get_maker', renderer='json')
+def get_maker(request):
     try:
-        one = DBSession.query(MyModel).filter(MyModel.name == 'one').first()
-    except DBAPIError:
+        response = {'maker': []}
+        makers = DBSession.query(Maker).all()
+        for maker in makers:
+             models = len(maker.models)
+             items = 0
+             for model in maker.models:
+                 items += len(model.items)
+             response['maker'].append({'id': maker.id, 'name': maker.name, 'description': maker.description, 'models': models, 'items': items})
+        return response
+    except DBAPIError as e:
         return Response(conn_err_msg, content_type='text/plain', status_int=500)
     return {'one': one, 'project': 'assetdb'}
+
+
+@view_config(route_name='show_maker', renderer='templates/maker.html')
+def show_maker(request):
+    try:
+        return {}
+    except Exception:
+        return Response(conn_err_msg, content_type='text/plain', status_int=500)
+
+
+@view_config(route_name='index', renderer='templates/index.html')
+def index(request):
+    try:
+        return {'name': 'hello'}
+    except DBAPIError:
+        return Response(conn_err_msg, content_type='text/plain', status_int=500)
+    return 
+
+@view_config(route_name='asset', renderer='templates/asset.html')
+def asset(request):
+    try:
+        return {}
+    except DBAPIError:
+        return Response(conn_err_msg, content_type='text/plain', status_int=500)
+    return
+
+@view_config(route_name='login', renderer='templates/login.pt')
+@forbidden_view_config(renderer='templates/login.pt')
+def login(request):
+    login_url = request.route_url('login')
+    referrer = request.url
+    if referrer == login_url:
+        referrer = '/' # never use the login form itself as came_from
+    came_from = request.params.get('came_from', referrer)
+    message = ''
+    login = ''
+    password = ''
+    if 'form.submitted' in request.params:
+        login = request.params['login']
+        password = request.params['password']
+        if USERS.get(login) == password:
+            headers = remember(request, login)
+            return HTTPFound(location = came_from,
+                             headers = headers)
+        message = 'Failed login'
+
+    return dict(
+        message = message,
+        url = request.application_url + '/login',
+        came_from = came_from,
+        login = login,
+        password = password,
+        )
+
+@view_config(route_name='logout')
+def logout(request):
+    headers = forget(request)
+    return HTTPFound(location = request.route_url('view_wiki'),
+                     headers = headers)
 
 
 conn_err_msg = """\
