@@ -30,11 +30,11 @@ def get_maker(request):
         response = {'maker': []}
         makers = DBSession.query(Maker).all()
         for maker in makers:
-             models = len(maker.models)
-             items = 0
-             for model in maker.models:
-                 items += len(model.items)
-             response['maker'].append({'id': maker.id, 'name': maker.name, 'description': maker.description, 'models': models, 'items': items})
+            models = len(maker.models)
+            items = 0
+            for model in maker.models:
+                items += len(model.items)
+            response['maker'].append({'id': maker.id, 'name': maker.name, 'description': maker.description, 'models': models, 'items': items})
         return response
     except DBAPIError as e:
         return Response(conn_err_msg, content_type='text/plain', status_int=500)
@@ -45,6 +45,35 @@ def get_maker(request):
 def show_maker(request):
     try:
         return {}
+    except Exception:
+        return Response(conn_err_msg, content_type='text/plain', status_int=500)
+
+
+@view_config(route_name='show_maker_detail', renderer='templates/maker_detail.html')
+def show_maker_detail(request):
+    try:
+        maker_id = request.matchdict['maker_id']
+        return {'maker_id': maker_id}
+    except Exception:
+        return Response(conn_err_msg, content_type='text/plain', status_int=500)
+
+
+@view_config(route_name='get_maker_detail', renderer='json')
+def get_maker_detail(request):
+    try:
+        maker_id = request.matchdict['maker_id']
+        maker = DBSession.query(Maker).filter(Maker.id==maker_id).one()
+        models = []
+        for model in maker.models:
+            model_items = []
+            for item in model.items:
+                installed = None
+                if item.installed_id:
+                    #installed_item = DBSession.query(Item).filter(Item.id==item.installed_id).one()
+                    installed = item.installed_description
+                model_items.append({'item_id': item.id, 'item_name': item.name, 'serial': item.serial, 'vendor': item.vendor.name, 'support': item.support, 'support_end': str(item.support_end), 'status': item.status, 'asset_number': item.asset_number, 'description': item.description, 'installed': installed})
+            models.append({'id':model.id, 'model_name': model.name, 'description': '-', 'asset_items': model_items})
+        return {'name': maker.name, 'description': maker.description, 'models': models}
     except Exception:
         return Response(conn_err_msg, content_type='text/plain', status_int=500)
 
