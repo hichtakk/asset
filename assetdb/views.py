@@ -18,6 +18,7 @@ from .models import (
     DBSession,
     Maker,
     Vendor,
+    Model,
     Location,
     Item
     )
@@ -58,6 +59,15 @@ def show_maker_detail(request):
         return Response(conn_err_msg, content_type='text/plain', status_int=500)
 
 
+@view_config(route_name='show_model_detail', renderer='templates/model_detail.html')
+def show_model_detail(request):
+    try:
+        model_id = request.matchdict['model_id']
+        return {'model_id': model_id}
+    except DBAPIError:
+        return Response(conn_err_msg, content_type='text/plain', status_int=500)
+
+
 @view_config(route_name='get_maker_detail', renderer='json')
 def get_maker_detail(request):
     try:
@@ -75,6 +85,38 @@ def get_maker_detail(request):
             models.append({'id':model.id, 'model_name': model.name, 'description': '-', 'asset_items': model_items})
         return {'name': maker.name, 'description': maker.description, 'models': models}
     except Exception:
+        return Response(conn_err_msg, content_type='text/plain', status_int=500)
+
+
+@view_config(route_name='get_model_detail', renderer='json')
+def get_model_detail(request):
+    try:
+        model_id = request.matchdict['model_id']
+        model = DBSession.query(Model).filter(Model.id==model_id).one()
+        items = []
+        for item in model.items:
+            items.append(
+                {
+                    'id': item.id,
+                    'name': item.name,
+                    'serial': item.serial,
+                    'vendor': {
+                      'id': item.vendor.id,
+                      'name': item.vendor.name,
+                    },
+                    'installed': item.installed_id,
+                    'support': item.support,
+                    'support_end': str(item.support_end),
+                    'status': item.status,
+                    'asset_number': item.asset_number,
+                    'settlement_number': item.settlement_number,
+                    'delivery_date': str(item.delivery_date),
+                    'description': item.description,
+                    'updated_at': str(item.updated_at)
+                }
+            )
+        return {'model_id': model_id, 'name': model.name, 'maker': {'id': model.maker.id, 'name': model.maker.name}, 'asset_items': items}
+    except DBAPIError:
         return Response(conn_err_msg, content_type='text/plain', status_int=500)
 
 

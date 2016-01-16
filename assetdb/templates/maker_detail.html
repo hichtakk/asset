@@ -1,0 +1,116 @@
+{% include "header.html" %}
+
+<h1 class="page-header">Maker Detail</h1>
+
+<h3>Maker</h3>
+<ul class="list-group">
+  <li id="maker-name" class="list-group-item"></li>
+  <li id="maker-description" class="list-group-item"></li>
+</ul>
+
+<h3>Models</h3>
+<div class="table-responsive">
+<table class="table table-striped">
+<thead>
+<tr>
+<th>name</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody id="models">
+</tbody>
+</table>
+</div>
+
+<h3>Assets</h3>
+<div class="table-responsive">
+<table class="table table-striped">
+<thead>
+<tr>
+<th>name</th>
+<th>description</th>
+<th>asset number</th>
+<th>serial</th>
+<th>model</th>
+<th>status</th>
+<th>installed</th>
+<th>vendor</th>
+<th>support</th>
+<th>support_end</th>
+</tr>
+</thead>
+<tbody id="assets">
+</tbody>
+</table>
+</div>
+
+
+<script type="text/javascript">
+$(function(){
+  $.ajax({
+    type: 'GET',
+    dataType: 'json',
+    cache: false,
+    url: '/api/maker/{{ maker_id }}',
+    success: function(data)
+    {
+      console.log(data)
+      $("#maker-name").text(data.name);
+      $("#maker-description").text(data.description ? data.description : "-");
+      var models = [];
+      var assets = [];
+      for (var index in data.models) {
+        models.push(
+          {
+            "id": data.models[index].id,
+            "name": data.models[index].model_name,
+            "description": data.models[index].description ? data.models[index].description : '-'
+          }
+        );
+        for (var asset_index in data.models[index].asset_items) {
+          assets.push(
+            {
+              "id": data.models[index].asset_items[asset_index].item_id,
+              "name": data.models[index].asset_items[asset_index].item_name,
+              "description": data.models[index].asset_items[asset_index].description ? data.models[index].asset_items[asset_index].description : '-',
+              "vendor": data.models[index].asset_items[asset_index].vendor,
+              "status": data.models[index].asset_items[asset_index].status,
+              "support": data.models[index].asset_items[asset_index].support,
+              "support_end": data.models[index].asset_items[asset_index].support_end,
+              "installed": data.models[index].asset_items[asset_index].installed ? data.models[index].asset_items[asset_index].installed : '-',
+              "asset_number": data.models[index].asset_items[asset_index].asset_number ? data.models[index].asset_items[asset_index].asset_number : '-',
+              "serial": data.models[index].asset_items[asset_index].serial,
+              "model": {"id": data.models[index].id, "name": data.models[index].model_name}
+            }
+          );
+        }
+      }
+      for (var model in models) {
+        $("#models").append(
+          "<tr><td>" + 
+          "<a href=\"/model/" + models[model].id + "\">" + models[model].name + "</a></td><td>" + 
+          models[model].description + "</td></tr>"
+        );
+      }
+      for (var asset in assets) {
+        $("#assets").append(
+          "<tr><td>" + 
+          "<a href=\"/asset/" + assets[asset].id + "\">" + assets[asset].name + "</a></td><td>" + 
+          assets[asset].description + "</td><td>" +
+          assets[asset].asset_number + "</td><td>" +
+          assets[asset].serial + "</td><td>" +
+          "<a href=\"/model/" + assets[asset].model.id + "\">" + assets[asset].model.name + "</a></td><td>" +
+          assets[asset].status + "</td><td>" +
+          assets[asset].installed + "</td><td>" +
+          assets[asset].vendor + "</td><td>" +
+          assets[asset].support + "</td><td>" +
+          assets[asset].support_end + "</td></tr>"
+        );
+      }
+      
+    }
+  });
+});
+</script>
+
+{% include "footer.html" %}

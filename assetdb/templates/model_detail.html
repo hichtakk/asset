@@ -1,0 +1,82 @@
+{% include "header.html" %}
+
+<h1 class="page-header">Model Detail</h1>
+
+<h3>Model</h3>
+<ul class="list-group">
+  <li id="model-name" class="list-group-item"></li>
+  <li id="model-description" class="list-group-item"></li>
+</ul>
+
+<h3>Assets</h3>
+<div class="table-responsive">
+<table class="table table-striped">
+<thead>
+<tr>
+<th>name</th>
+<th>description</th>
+<th>asset number</th>
+<th>serial</th>
+<th>status</th>
+<th>installed</th>
+<th>vendor</th>
+<th>support</th>
+<th>support_end</th>
+</tr>
+</thead>
+<tbody id="assets">
+</tbody>
+</table>
+</div>
+
+
+<script type="text/javascript">
+$(function(){
+  $.ajax({
+    type: 'GET',
+    dataType: 'json',
+    cache: false,
+    url: '/api/model/{{ model_id }}',
+    success: function(data)
+    {
+      console.log(data)
+      $("#model-name").text(data.name);
+      $("#model-description").text(data.description ? data.description : "-");
+      var assets = [];
+      for (var index in data.asset_items) {
+        assets.push(
+          {
+            "id": data.asset_items[index].id,
+            "name": data.asset_items[index].name,
+            "description": data.asset_items[index].description ? data.asset_items[index].description : '-',
+            "vendor": data.asset_items[index].vendor,
+            "status": data.asset_items[index].status,
+            "support": data.asset_items[index].support,
+            "support_end": data.asset_items[index].support_end,
+            "installed": data.asset_items[index].installed ? data.asset_items[index].installed : '-',
+            "asset_number": data.asset_items[index].asset_number ? data.asset_items[index].asset_number : '-',
+            "serial": data.asset_items[index].serial
+          }
+        );
+      }
+      for (var asset in assets) {
+        $("#assets").append(
+          "<tr><td>" + 
+          "<a href=\"/asset/" + assets[asset].id + "\">" + assets[asset].name + "</a></td><td>" + 
+          assets[asset].description + "</td><td>" +
+          assets[asset].asset_number + "</td><td>" +
+          assets[asset].serial + "</td><td>" +
+          assets[asset].status + "</td><td>" +
+          assets[asset].installed + "</td><td>" +
+          "<a href=\"/vendor/" + assets[asset].vendor.id + "\">" + assets[asset].vendor.name + "</a></td><td>" +
+          assets[asset].support + "</td><td>" +
+          assets[asset].support_end + "</td></tr>"
+        );
+      }
+      
+    }
+  });
+});
+</script>
+
+{% include "footer.html" %}
