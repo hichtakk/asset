@@ -19,7 +19,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import (
     scoped_session,
     sessionmaker,
-    relationship
+    relationship,
+    backref
     )
 
 from pyramid.security import (
@@ -112,6 +113,9 @@ class Item(Base):
     model = relationship('Model', back_populates='items')
     vendor = relationship('Vendor', back_populates='items')
     location = relationship('Location', back_populates='items')
-    attachments = relationship('Item')
+    attachments = relationship(
+        'Item',
+        backref=backref('parent', remote_side=[id])
+    )
 
 
