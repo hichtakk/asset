@@ -75,7 +75,7 @@ class Model(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(64))
     maker_id = Column(Integer, ForeignKey('maker.id'))
-    #description = Column(String(256))
+    description = Column(String(256))
 
     maker = relationship('Maker', back_populates='models')
     items = relationship('Item', back_populates='model')
